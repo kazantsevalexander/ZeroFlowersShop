@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина</title>
+</head>
+<body>
+    <h1>Корзина</h1>
+    <ul>
+        {% for item in cart_items %}
+            <li>
+                {{ item.quantity }} x {{ item.product.name }} ({{ item.total_price }} BYN)
+                <a href="{% url 'remove_from_cart' item.id %}">Удалить</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <p>Итого: {{ total }} BYN</p>
+    <a href="{% url 'checkout' %}">Перейти к оформлению</a>
+</body>
+</html>

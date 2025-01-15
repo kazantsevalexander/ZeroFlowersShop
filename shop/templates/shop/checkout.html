@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оформление заказа</title>
+</head>
+<body>
+    <h1>Оформление заказа</h1>
+    <ul>
+        {% for item in cart_items %}
+            <li>{{ item.quantity }} x {{ item.product.name }}</li>
+        {% endfor %}
+    </ul>
+    <form method="post">
+        {% csrf_token %}
+        <label for="address">Адрес доставки:</label><br>
+        <textarea id="address" name="delivery_address" rows="3" required></textarea><br>
+        <button type="submit">Оформить заказ</button>
+    </form>
+</body>
+</html>

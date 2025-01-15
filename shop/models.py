@@ -21,3 +21,16 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Заказ {self.id} от {self.user.username}"
+
+
+class CartItem(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Связь с пользователем
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)  # Связь с товаром
+    quantity = models.PositiveIntegerField(default=1)  # Количество товаров
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name}"
+
+    @property
+    def total_price(self):
+        return self.quantity * self.product.price
