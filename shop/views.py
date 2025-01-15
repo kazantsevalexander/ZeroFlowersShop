@@ -1,5 +1,5 @@
-from django.shortcuts import render, redirect
-from .models import Product
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Product, Order
 from .forms import OrderForm
 import asyncio
 from bot import bot, ADMIN_CHAT_ID
@@ -8,6 +8,7 @@ from bot import bot, ADMIN_CHAT_ID
 def product_list(request):
     products = Product.objects.all()
     return render(request, 'shop/product_list.html', {'products': products})
+
 
 def place_order(request):
     if request.method == 'POST':

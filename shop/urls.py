@@ -5,4 +5,3 @@ urlpatterns = [
     path('', views.product_list, name='product_list'),
     path('order/', views.place_order, name='place_order'),
 ]
-
