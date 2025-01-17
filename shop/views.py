@@ -21,20 +21,20 @@ async def send_telegram_message(message: str):
 
 
 def product_list(request):
-    # Получение всех продуктов
     products = Product.objects.all()
 
-    # Получение данных корзины для текущего пользователя
     cart_items = {}
+    quantity = 0
     if request.user.is_authenticated:
         user_cart_items = CartItem.objects.filter(user=request.user)
         cart_items = {item.product.id: item.quantity for item in user_cart_items}
+        quantity = sum(item.quantity for item in user_cart_items)
 
     return render(request, 'shop/product_list.html', {
         'products': products,
-        'cart_items': cart_items  # Передача количества товаров в корзине
+        'cart_items': cart_items,  # {product.id: quantity}
+        'quantity': quantity       # суммарное кол-во всех товаров
     })
-
 
 
 

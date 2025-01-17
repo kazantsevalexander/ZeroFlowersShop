@@ -38,7 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'shop',
+    'accounts',
 ]
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -50,6 +53,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
+LOGIN_REDIRECT_URL = 'product_list'  # или другая ваша страница
+LOGOUT_REDIRECT_URL = 'product_list'
 ROOT_URLCONF = 'flower_delivery.urls'
 
 TEMPLATES = [
