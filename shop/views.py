@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Product, Order, OrderItem
-import asyncio
 from BAKbot import bot, ADMIN_CHAT_ID
 from django.contrib.auth.decorators import login_required
 from .forms import OrderForm
@@ -225,3 +224,32 @@ def view_cart(request):
         'total': total_price,
         'total_quantity': total_quantity  # Передаем общее количество
     })
+
+
+@csrf_exempt
+def update_cart(request, product_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            quantity = int(data.get('quantity', 1))
+
+            cart = request.session.get('cart', {})
+            cart[str(product_id)] = quantity
+            request.session['cart'] = cart
+            request.session.modified = True
+
+            # Пересчет итоговых значений
+            total_price = sum(
+                Product.objects.get(id=int(pid)).price * qty
+                for pid, qty in cart.items()
+            )
+            total_quantity = sum(cart.values())
+
+            return JsonResponse({
+                'success': True,
+                'total_quantity': total_quantity,
+                'total_price': total_price
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)

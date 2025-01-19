@@ -11,7 +11,7 @@
         <div class="row">
             <div class="col-lg-8">
                 {% for item in cart_items %}
-                    <div class="cart-item">
+                    <div class="cart-item" data-product-id="{{ item.product.id }}">
                         <div class="row align-items-center">
                             <div class="col-md-2">
                                 {% if item.product.image %}
@@ -72,23 +72,58 @@
         {% endif %}
     </main>
 
-    <script>
-        // Обработка кнопок изменения количества
-        document.querySelectorAll('.quantity-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const isDecrease = this.classList.contains('decrease');
-                const quantitySpan = this.parentElement.querySelector('span');
-                let quantity = parseInt(quantitySpan.textContent);
+<script>
+    document.querySelectorAll('.quantity-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const isDecrease = this.classList.contains('decrease');
+            const quantitySpan = this.parentElement.querySelector('span');
+            let quantity = parseInt(quantitySpan.textContent);
+            const productId = this.closest('.cart-item').dataset.productId;
 
-                if (isDecrease && quantity > 1) {
-                    quantity--;
-                } else if (!isDecrease) {
-                    quantity++;
+            if (isDecrease && quantity > 1) {
+                quantity--;
+            } else if (!isDecrease) {
+                quantity++;
+            }
+
+            quantitySpan.textContent = quantity;
+
+            // Отправка обновленных данных на сервер
+            fetch(`/shop/update-cart/${productId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken(),
+                },
+                body: JSON.stringify({ quantity: quantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Обновляем итоговые данные в саммари-карте
+                    document.querySelector('.summary-card span:nth-child(2)').textContent = `${data.total_quantity} шт.`;
+                    document.querySelector('.summary-card strong.item-price').textContent = `${data.total_price} BYN`;
+                } else {
+                    alert('Ошибка при обновлении корзины');
                 }
-
-                quantitySpan.textContent = quantity;
-                // Здесь можно добавить AJAX-запрос для обновления количества на сервере
-            });
+            })
+            .catch(error => console.error('Ошибка:', error));
         });
-    </script>
+    });
+
+    // Функция для получения CSRF-токена из куков
+    function getCSRFToken() {
+        let cookieValue = null;
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith('csrftoken=')) {
+                cookieValue = cookie.substring('csrftoken='.length, cookie.length);
+                break;
+            }
+        }
+        return cookieValue;
+    }
+
+</script>
 {% endblock %}
