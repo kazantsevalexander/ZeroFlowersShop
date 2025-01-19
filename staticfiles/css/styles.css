@@ -1,0 +1,15 @@
+.image-container {
+    height: 250px; /* Устанавливаем фиксированную высоту */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Подгоняет изображение по высоте, обрезая лишнее */
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
