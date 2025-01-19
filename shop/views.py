@@ -2,13 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Product, Order, OrderItem
 import asyncio
 from BAKbot import bot, ADMIN_CHAT_ID
-from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from aiogram import Bot
 from .forms import OrderForm
 from django.contrib import messages
 import requests
-
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 ADMIN_CHAT_ID = '6618330710'
 TELEGRAM_BOT_TOKEN = '7621395982:AAEBUp892ayfVzC0o0ZZJcwOvUtjJCiRVDo'
@@ -225,5 +225,3 @@ def view_cart(request):
         'total': total_price,
         'total_quantity': total_quantity  # Передаем общее количество
     })
-
-
