@@ -32,7 +32,9 @@
                         </div>
                     </div>
                     <div class="col-md-2 text-center">
-                        <span class="item-price fw-bold fs-5 text-success">{{ item.total_price }} BYN</span>
+                        <span class="item-price fw-bold fs-5 text-success" data-unit-price="{{ item.product.price }}">
+                            {{ item.total_price }} BYN
+                        </span>
                     </div>
                     <div class="col-md-1 text-end">
                         <a href="{% url 'remove_from_cart' item.product.id %}" class="btn btn-outline-danger btn-sm">
@@ -79,6 +81,8 @@
             const input = this.closest('.quantity-control').querySelector('input');
             let quantity = parseInt(input.value);
             const productId = this.closest('.cart-item').dataset.productId;
+            const priceElement = this.closest('.cart-item').querySelector('.item-price');
+            const unitPrice = parseFloat(priceElement.getAttribute('data-unit-price'));
 
             if (isDecrease && quantity > 1) {
                 quantity--;
@@ -88,6 +92,11 @@
 
             input.value = quantity;
 
+            // Пересчёт суммы товара на основе количества и цены за единицу
+            const newTotal = (unitPrice * quantity).toFixed(2);
+            priceElement.textContent = `${newTotal} BYN`;
+
+            // Отправка обновленных данных на сервер
             fetch(`/shop/update-cart/${productId}/`, {
                 method: 'POST',
                 headers: {
@@ -99,6 +108,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Обновляем итоговые данные в саммари-карте
                     document.querySelector('.summary-card span.fw-bold').textContent = `${data.total_quantity} шт.`;
                     document.querySelector('.summary-card strong.item-price').textContent = `${data.total_price} BYN`;
                 } else {
@@ -109,6 +119,7 @@
         });
     });
 
+    // Функция для получения CSRF-токена из куков
     function getCSRFToken() {
         let cookieValue = null;
         const cookies = document.cookie.split(';');

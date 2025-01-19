@@ -1,0 +1,142 @@
+/* Общие стили для всего сайта */
+body {
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;  /* Светлый фон */
+    color: #3a3a3a; /* Основной текст в современном сером оттенке */
+}
+
+/* Перекраска заголовков */
+h1, h2, h3, h4, h5, h6 {
+    color: #2c3e50; /* Глубокий серо-синий цвет для заголовков */
+}
+
+/* Кнопки в стиле современного UI */
+.btn-primary {
+    background: linear-gradient(to right, #6c757d, #495057); /* Градиент серых оттенков */
+    border: none;
+    color: #ffffff;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(to right, #495057, #343a40); /* Темный при наведении */
+    color: #f8f9fa;
+}
+
+.btn-success {
+    background: linear-gradient(to right, #86b48e, #72a37d); /* Зелёный градиент в сдержанном тоне */
+    border: none;
+    color: #ffffff;
+}
+
+.btn-success:hover {
+    background: linear-gradient(to right, #218838, #1e7e34);
+}
+
+/* Второстепенные кнопки */
+.btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: #ffffff;
+}
+
+/* Карточки товаров */
+.card {
+    background: #ffffff;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Стили для инпутов */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    background-color: #f9f9f9;
+    color: #495057;
+    transition: all 0.3s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: #6c757d;
+    box-shadow: 0 0 5px rgba(108, 117, 125, 0.5);
+}
+
+/* Ссылки */
+a {
+    color: #6c757d;
+    text-decoration: none;
+    transition: color 0.3s ease-in-out;
+}
+
+a:hover {
+    color: #495057;
+}
+
+/* Перекраска навигационного меню */
+.navbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.navbar .nav-link {
+    color: #495057;
+}
+
+.navbar .nav-link:hover {
+    color: #5f8cb8;
+}
+
+/* Иконки Bootstrap */
+.bi {
+    color: #c9d5de;
+    font-size: 1.2rem;
+}
+
+.bi:hover {
+    color: #a4b0bb;
+}
+
+/* Общий стиль для уведомлений и алертов */
+.alert {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Суммарный блок на странице корзины */
+.summary-card {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+}
+
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+
+main {
+    flex: 1;
+}
+
+footer {
+    background-color: #2c3e50;
+    color: #f8f9fa;
+    padding: 20px 0;
+    text-align: center;
+}

@@ -14,13 +14,6 @@
     border-top-right-radius: 8px;
 }
 
-body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    margin: 0;
-    background-color: #f8f9fa;
-}
 main {
     flex: 1;
 }
@@ -32,9 +25,4 @@ main {
     font-size: 1.5rem;
     font-weight: 600;
     color: #fff !important;
-}
-footer {
-    background: linear-gradient(to right, #1a1a1a, #292929);
-    padding: 2rem 0;
-    margin-top: 4rem;
 }

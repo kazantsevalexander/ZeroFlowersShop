@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Product, Order, OrderItem
-from BAKbot import bot, ADMIN_CHAT_ID
+from .models import Product, OrderItem
+from BAKbot import ADMIN_CHAT_ID
 from django.contrib.auth.decorators import login_required
 from .forms import OrderForm
 from django.contrib import messages
@@ -8,9 +8,7 @@ import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-
-ADMIN_CHAT_ID = '6618330710'
-TELEGRAM_BOT_TOKEN = '7621395982:AAEBUp892ayfVzC0o0ZZJcwOvUtjJCiRVDo'
+from config import ADMIN_CHAT_ID, TELEGRAM_BOT_TOKEN
 
 def send_telegram_message_sync(message: str):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
