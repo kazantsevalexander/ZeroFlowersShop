@@ -6,21 +6,26 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from aiogram import Bot
 from .forms import OrderForm
-from asgiref.sync import async_to_sync
 from django.contrib import messages
+import requests
 
 
-ADMIN_CHAT_ID = '6618330710'  # Укажите ваш ID чата
-bot = Bot(token='7621395982:AAEBUp892ayfVzC0o0ZZJcwOvUtjJCiRVDo')  # Укажите ваш токен бота
+ADMIN_CHAT_ID = '6618330710'
+TELEGRAM_BOT_TOKEN = '7621395982:AAEBUp892ayfVzC0o0ZZJcwOvUtjJCiRVDo'
 
-
-# Отправка уведомления в Telegram через безопасный вызов
-async def send_telegram_message(message: str):
+def send_telegram_message_sync(message: str):
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        'chat_id': ADMIN_CHAT_ID,
+        'text': message,
+        'parse_mode': 'HTML'
+    }
     try:
-        await bot.send_message(ADMIN_CHAT_ID, message)
-    except Exception as e:
+        response = requests.post(url, data=payload, timeout=10)
+        response.raise_for_status()
+        print(f"Сообщение успешно отправлено: {response.json()}")
+    except requests.RequestException as e:
         print(f"Ошибка отправки сообщения в Telegram: {e}")
-
 
 def product_list(request):
     products = Product.objects.all()
@@ -63,6 +68,7 @@ def add_to_cart(request, product_id):
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
 
+
 def view_cart(request):
     cart = request.session.get('cart', {})
 
@@ -84,7 +90,6 @@ def view_cart(request):
     return render(request, 'shop/cart.html', {'cart_items': cart_items, 'total': total})
 
 
-
 def remove_from_cart(request, product_id):
     cart = request.session.get('cart', {})
 
@@ -94,26 +99,60 @@ def remove_from_cart(request, product_id):
     request.session['cart'] = cart
     return redirect('cart')
 
+
 @login_required
 def checkout(request):
     cart = request.session.get('cart', {})
 
     if not cart:
-        return redirect('cart')  # Перенаправление, если корзина пуста
+        return redirect('cart')
 
     if request.method == 'POST':
         form = OrderForm(request.POST)
         if form.is_valid():
             order = form.save(commit=False)
             order.user = request.user
-            order.total_price = sum(
-                Product.objects.get(id=int(product_id)).price * quantity
-                for product_id, quantity in cart.items()
-            )
+
+            # Подсчет общей стоимости
+            cart_items = []
+            total_price = 0
+
+            for product_id, quantity in cart.items():
+                product = Product.objects.get(id=int(product_id))
+                item_total = product.price * quantity
+                total_price += item_total
+                cart_items.append({
+                    'product': product,
+                    'quantity': quantity,
+                    'total_price': item_total
+                })
+
+            order.total_price = total_price
             order.save()
+
+            # Формируем сообщение для Telegram
+            message = f"🛍 Новый заказ #{order.id}\n\n"
+            message += f"👤 Получатель: {order.recipient_name}\n"
+            message += f"📞 Телефон: {order.phone}\n"
+            message += f"📍 Адрес доставки: {order.delivery_address}\n"
+
+            if order.comments:
+                message += f"💬 Комментарий: {order.comments}\n"
+
+            message += "\n📦 Товары:\n"
+
+            for item in cart_items:
+                message += f"- {item['product'].name} x{item['quantity']} = {item['total_price']}₽\n"
+
+            message += f"\n💰 Общая сумма: {total_price}₽"
+            message += f"\n📅 Дата заказа: {order.created_at.strftime('%d.%m.%Y %H:%M')}"
+
+            # Отправляем уведомление в Telegram используя новую функцию
+            send_telegram_message_sync(message)
 
             # Очистка корзины после успешного оформления заказа
             request.session['cart'] = {}
+            messages.success(request, 'Заказ успешно оформлен!')
             return redirect('order_success', order_id=order.id)
 
     else:
@@ -141,14 +180,19 @@ def order_success(request, order_id):
 
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
+    quantity = int(request.POST.get('quantity', 1))  # Получаем количество из формы
+
     cart = request.session.get('cart', {})
 
+    # Если товар уже в корзине, увеличиваем количество, иначе добавляем с указанным числом
     if str(product_id) in cart:
-        cart[str(product_id)] += 1
+        cart[str(product_id)] += quantity
     else:
-        cart[str(product_id)] = 1
+        cart[str(product_id)] = quantity
 
     request.session['cart'] = cart
+    request.session.modified = True  # Помечаем сессию как измененную
+
     messages.success(request, f'{product.name} добавлен в корзину')
     return redirect('cart')
 
@@ -161,15 +205,25 @@ def remove_from_cart(request, product_id):
 
 def view_cart(request):
     cart = request.session.get('cart', {})
+
     cart_items = []
-    total = 0
+    total_price = 0
+    total_quantity = 0
+
     for product_id, quantity in cart.items():
-        product = Product.objects.get(id=product_id)
+        product = Product.objects.get(id=int(product_id))
         cart_items.append({
             'product': product,
             'quantity': quantity,
             'total_price': product.price * quantity
         })
-        total += product.price * quantity
-    return render(request, 'shop/cart.html', {'cart_items': cart_items, 'total': total})
+        total_price += product.price * quantity
+        total_quantity += quantity  # Подсчет общего количества товаров
+
+    return render(request, 'shop/cart.html', {
+        'cart_items': cart_items,
+        'total': total_price,
+        'total_quantity': total_quantity  # Передаем общее количество
+    })
+
 
