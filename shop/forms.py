@@ -4,7 +4,10 @@ from .models import Order
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ['product', 'quantity', 'delivery_address']
+        fields = ['recipient_name', 'phone', 'delivery_address', 'comments']
         widgets = {
-            'delivery_address': forms.Textarea(attrs={'rows': 3}),
+            'recipient_name': forms.TextInput(attrs={'class': 'form-control', 'id': 'name'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'id': 'phone'}),
+            'delivery_address': forms.Textarea(attrs={'class': 'form-control', 'id': 'address', 'rows': 3}),
+            'comments': forms.Textarea(attrs={'class': 'form-control', 'id': 'comments', 'rows': 2}),
         }

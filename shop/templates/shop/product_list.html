@@ -22,9 +22,10 @@
                             <label for="quantity-{{ product.id }}" class="form-label">Количество:</label>
                             <input type="number" id="quantity-{{ product.id }}" class="form-control quantity-input mb-3" value="1" min="1">
                         </div>
-                        <button type="button" class="btn btn-primary mt-auto add-to-cart" data-product-id="{{ product.id }}">
-                            <i class="bi bi-cart-plus me-2"></i>Добавить в корзину
-                        </button>
+                        <form action="{% url 'add_to_cart' product.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">Добавить в корзину</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -33,60 +34,4 @@
         </div>
     </main>
 
-    <script>
-        document.querySelectorAll('.add-to-cart').forEach(button => {
-            button.addEventListener('click', function(event) {
-                event.preventDefault();
-                const productId = this.getAttribute('data-product-id');
-                const quantityInput = document.getElementById(`quantity-${productId}`);
-                const quantity = quantityInput ? quantityInput.value : 1;
-
-                // Добавляем анимацию кнопки при клике
-                this.classList.add('disabled');
-                this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Добавляем...';
-
-                fetch(`/add_to_cart/${productId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ quantity })
-                }).then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    }
-                    throw new Error('Ошибка добавления в корзину');
-                }).then(data => {
-                    document.getElementById('cart-count').innerText = data.cart_count;
-
-                    // Возвращаем кнопку в исходное состояние
-                    this.classList.remove('disabled');
-                    this.innerHTML = '<i class="bi bi-cart-plus me-2"></i>Добавить в корзину';
-
-                    // Показываем уведомление об успешном добавлении
-                    const toast = document.createElement('div');
-                    toast.className = 'position-fixed bottom-0 end-0 p-3';
-                    toast.style.zIndex = '11';
-                    toast.innerHTML = `
-                        <div class="toast show" role="alert">
-                            <div class="toast-header bg-success text-white">
-                                <strong class="me-auto">Успешно</strong>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                            </div>
-                            <div class="toast-body">
-                                Товар добавлен в корзину
-                            </div>
-                        </div>
-                    `;
-                    document.body.appendChild(toast);
-                    setTimeout(() => toast.remove(), 3000);
-                }).catch(error => {
-                    console.error(error);
-                    this.classList.remove('disabled');
-                    this.innerHTML = '<i class="bi bi-cart-plus me-2"></i>Добавить в корзину';
-                });
-            });
-        });
-    </script>
 {% endblock %}

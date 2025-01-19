@@ -3,24 +3,6 @@
 {% block title %}Название страницы{% endblock %}
 
 {% block content %}
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="bi bi-flower1 me-2"></i>
-                Flower Delivery
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Каталог</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
 
     <main class="container my-5">
         <h1 class="page-title">Корзина</h1>
@@ -29,36 +11,36 @@
         <div class="row">
             <div class="col-lg-8">
                 {% for item in cart_items %}
-                <div class="cart-item">
-                    <div class="row align-items-center">
-                        <div class="col-md-2">
-                            {% if item.product.image_url %}
-                                <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="img-fluid">
-                            {% else %}
-                                <img src="https://via.placeholder.com/100" alt="Нет изображения" class="img-fluid">
-                            {% endif %}
-                        </div>
-                        <div class="col-md-4">
-                            <h5 class="item-title">{{ item.product.name }}</h5>
-                            <p class="text-muted mb-0">Артикул: #{{ item.product.id }}</p>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="quantity-control">
-                                <button class="quantity-btn decrease">-</button>
-                                <span>{{ item.quantity }}</span>
-                                <button class="quantity-btn increase">+</button>
+                    <div class="cart-item">
+                        <div class="row align-items-center">
+                            <div class="col-md-2">
+                                {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" class="card-img-top" alt="{{ item.product.name }}">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/100" class="card-img-top" alt="Нет изображения">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <h5 class="item-title">{{ item.product.name }}</h5>
+                                <p class="text-muted mb-0">Артикул: #{{ item.product.id }}</p>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="quantity-control">
+                                    <button class="quantity-btn decrease">-</button>
+                                    <span>{{ item.quantity }}</span>
+                                    <button class="quantity-btn increase">+</button>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <span class="item-price">{{ item.total_price }} BYN</span>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <a href="{% url 'remove_from_cart' item.product.id|default:0 %}" class="btn-remove">
+                                    <i class="bi bi-trash"></i>
+                                </a>
                             </div>
                         </div>
-                        <div class="col-md-2">
-                            <span class="item-price">{{ item.total_price }} BYN</span>
-                        </div>
-                        <div class="col-md-2 text-end">
-                            <a href="{% url 'remove_from_cart' item.id %}" class="btn-remove">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        </div>
                     </div>
-                </div>
                 {% endfor %}
             </div>
 

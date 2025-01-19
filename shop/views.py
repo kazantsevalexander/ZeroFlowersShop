@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Product, Order, CartItem
+from .models import Product, Order, OrderItem
 import asyncio
 from BAKbot import bot, ADMIN_CHAT_ID
 from django.http import JsonResponse
@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from aiogram import Bot
 from .forms import OrderForm
 from asgiref.sync import async_to_sync
+from django.contrib import messages
+
 
 ADMIN_CHAT_ID = '6618330710'  # Укажите ваш ID чата
 bot = Bot(token='7621395982:AAEBUp892ayfVzC0o0ZZJcwOvUtjJCiRVDo')  # Укажите ваш токен бота
@@ -23,7 +25,6 @@ async def send_telegram_message(message: str):
 def product_list(request):
     products = Product.objects.all()
     return render(request, 'shop/product_list.html', {'products': products})
-
 
 
 def place_order(request):
@@ -46,7 +47,7 @@ def add_to_cart(request, product_id):
 
         print(f"Получен запрос на добавление: Продукт ID={product_id}, Количество={quantity}")
 
-        cart_item, created = CartItem.objects.get_or_create(
+        cart_item, created = OrderItem.objects.get_or_create(
             user=request.user, product=product
         )
         if created:
@@ -57,82 +58,118 @@ def add_to_cart(request, product_id):
 
         print(f"Обновлено: Продукт ID={product_id}, Количество в корзине={cart_item.quantity}")
 
-        cart_count = CartItem.objects.filter(user=request.user).count()
+        cart_count = OrderItem.objects.filter(user=request.user).count()
         return JsonResponse({'cart_count': cart_count})
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
 
-
 def view_cart(request):
-    cart_items = CartItem.objects.filter(user=request.user)
-    total = sum(item.total_price for item in cart_items)
+    cart = request.session.get('cart', {})
 
-    # Передача полного списка элементов с их количеством
-    return render(
-        request,
-        'shop/view_cart.html',
-        {
-            'cart_items': cart_items,
-            'total': total
-        }
-    )
+    cart_items = []
+    total = 0
+
+    for product_id, quantity in cart.items():
+        try:
+            product = Product.objects.get(id=int(product_id))
+            cart_items.append({
+                'product': product,
+                'quantity': quantity,
+                'total_price': product.price * quantity
+            })
+            total += product.price * quantity
+        except Product.DoesNotExist:
+            pass  # Игнорируем несуществующие товары
+
+    return render(request, 'shop/cart.html', {'cart_items': cart_items, 'total': total})
 
 
-def remove_from_cart(request, cart_item_id):
-    cart_item = CartItem.objects.get(id=cart_item_id, user=request.user)
-    cart_item.delete()
-    return redirect('view_cart')
 
+def remove_from_cart(request, product_id):
+    cart = request.session.get('cart', {})
+
+    if str(product_id) in cart:
+        del cart[str(product_id)]
+
+    request.session['cart'] = cart
+    return redirect('cart')
 
 @login_required
 def checkout(request):
-    cart_items = CartItem.objects.filter(user=request.user)
-    if not cart_items.exists():
-        return redirect('product_list')  # Перенаправление, если корзина пуста
+    cart = request.session.get('cart', {})
+
+    if not cart:
+        return redirect('cart')  # Перенаправление, если корзина пуста
 
     if request.method == 'POST':
-        delivery_address = request.POST.get('delivery_address')
-        if delivery_address:
-            total_price = 0
-            order_details = []  # Очищаем, чтобы избежать дублирования
-
-            for item in cart_items:
-                # Создание заказа на основе корзины
-                Order.objects.create(
-                    user=request.user,
-                    product=item.product,
-                    quantity=item.quantity,
-                    delivery_address=delivery_address,
-                )
-                total_price += item.quantity * item.product.price
-                # Добавляем строку с количеством и итоговой ценой за товар
-                order_details.append(
-                    f"• {item.product.name} × {item.quantity} шт. — {item.quantity * item.product.price:.2f} BYN"
-                )
-
-            # Очистка корзины после оформления заказа
-            cart_items.delete()
-
-            # Формирование сообщения для Telegram
-            message = (
-                f"🌸 НОВЫЙ ЗАКАЗ!\n\n"
-                f"👤 Получатель: {request.POST['recipient_name']}\n"
-                f"📱 Телефон: {request.POST['phone']}\n"
-                f"📧 Email: {request.POST['email']}\n"
-                f"📍 Адрес доставки: {request.POST['delivery_address']}\n"
-                f"\n🛍️ СОСТАВ ЗАКАЗА:\n" +
-                "\n".join(order_details) +
-                f"\n\n💰 Итого к оплате: {total_price:.2f} BYN"
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.user = request.user
+            order.total_price = sum(
+                Product.objects.get(id=int(product_id)).price * quantity
+                for product_id, quantity in cart.items()
             )
+            order.save()
 
-            if request.POST.get('comments'):
-                message += f"\n\n✏️ Комментарий к заказу:\n{request.POST['comments']}"
+            # Очистка корзины после успешного оформления заказа
+            request.session['cart'] = {}
+            return redirect('order_success', order_id=order.id)
 
-            # Отправляем сообщение в Telegram
-            async_to_sync(send_telegram_message)(message)
+    else:
+        form = OrderForm()
 
-            return redirect('product_list')  # Перенаправление на главную после заказа
+    cart_items = [
+        {
+            'product': Product.objects.get(id=int(product_id)),
+            'quantity': quantity,
+            'total_price': Product.objects.get(id=int(product_id)).price * quantity,
+        }
+        for product_id, quantity in cart.items()
+    ]
 
-    return render(request, 'shop/checkout.html', {'cart_items': cart_items})
+    total = sum(item['total_price'] for item in cart_items)
 
+    return render(request, 'shop/checkout.html', {
+        'form': form,
+        'cart_items': cart_items,
+        'total': total,
+    })
+
+def order_success(request, order_id):
+    return render(request, 'shop/order_success.html', {'order_id': order_id})
+
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    cart = request.session.get('cart', {})
+
+    if str(product_id) in cart:
+        cart[str(product_id)] += 1
+    else:
+        cart[str(product_id)] = 1
+
+    request.session['cart'] = cart
+    messages.success(request, f'{product.name} добавлен в корзину')
+    return redirect('cart')
+
+def remove_from_cart(request, product_id):
+    cart = request.session.get('cart', {})
+    if str(product_id) in cart:
+        del cart[str(product_id)]
+    request.session['cart'] = cart
+    return redirect('cart')
+
+def view_cart(request):
+    cart = request.session.get('cart', {})
+    cart_items = []
+    total = 0
+    for product_id, quantity in cart.items():
+        product = Product.objects.get(id=product_id)
+        cart_items.append({
+            'product': product,
+            'quantity': quantity,
+            'total_price': product.price * quantity
+        })
+        total += product.price * quantity
+    return render(request, 'shop/cart.html', {'cart_items': cart_items, 'total': total})
 
