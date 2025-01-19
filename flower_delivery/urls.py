@@ -1,11 +1,16 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
+from shop.views import product_list  # Исправляем импорт, берем из приложения shop
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('shop.urls')),  # Подключаем маршруты из приложения shop
-    path('login/', auth_views.LoginView.as_view(template_name='accounts/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('accounts/', include('accounts.urls')),  # или как вы назвали
+    path('shop/', include('shop.urls')),
+    path('accounts/', include('accounts.urls')),
+    path('', product_list, name='home'),  # Главная страница теперь указывает на shop.views.product_list
+
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

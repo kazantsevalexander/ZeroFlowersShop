@@ -1,12 +1,8 @@
-# accounts/urls.py
 from django.urls import path
-from django.contrib.auth import views as auth_views
-from .views import register_view, logout_request
+from .views import register, user_login, user_logout
 
 urlpatterns = [
-    path('register/', register_view, name='register'),
-
-    # Встроенные вьюхи:
-    path('login/', auth_views.LoginView.as_view(template_name='accounts/login.html'), name='login'),
-    path('logout/', logout_request, name='logout'),
+    path('register/', register, name='register'),
+    path('login/', user_login, name='login'),
+    path('logout/', user_logout, name='logout'),
 ]

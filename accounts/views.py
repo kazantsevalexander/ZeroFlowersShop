@@ -1,23 +1,33 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, logout
+from .forms import CustomUserCreationForm
+from django.contrib.auth.forms import AuthenticationForm
 
 
-def register_view(request):
+def register(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Автоматически логиним новосозданного пользователя:
             login(request, user)
-            return redirect('product_list')  # куда перенаправить после успешной регистрации
+            return redirect('product_list')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
     return render(request, 'accounts/register.html', {'form': form})
 
 
-def logout_request(request):
+def user_login(request):
     if request.method == 'POST':
-        logout(request)
-        return redirect('product_list')
-    return render(request, 'accounts/logout.html')
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('product_list')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'accounts/login.html', {'form': form})
+
+
+def user_logout(request):
+    logout(request)
+    return redirect('product_list')
