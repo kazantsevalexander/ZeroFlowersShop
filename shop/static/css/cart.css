@@ -1,0 +1,42 @@
+.cart-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    transition: all 0.3s ease-in-out;
+}
+
+.cart-item:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.input-group .btn {
+    min-width: 40px;
+}
+
+.summary-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #f9f9f9;
+}
+
+.btn-checkout {
+    font-size: 1.2rem;
+    border-radius: 10px;
+    background: linear-gradient(to right, #28a745, #218838);
+    color: white;
+    transition: 0.3s ease-in-out;
+}
+
+.btn-checkout:hover {
+    background: linear-gradient(to right, #218838, #1e7e34);
+}
+
+.text-muted {
+    font-size: 0.9rem;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+}

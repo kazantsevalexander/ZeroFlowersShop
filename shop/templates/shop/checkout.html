@@ -1,72 +1,72 @@
 {% extends "shop/base.html" %}
 
-{% block title %}Название страницы{% endblock %}
+{% block title %}Оформление заказа{% endblock %}
 
 {% block content %}
 
-    <main class="container my-5">
-        <h1 class="page-title">Оформление заказа</h1>
+<main class="container my-5">
+    <h1 class="text-center mb-4 fw-bold text-dark">Оформление заказа</h1>
 
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="checkout-card">
-                    <h3 class="section-title">Данные для доставки</h3>
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Имя получателя</label>
-                            <input type="text" class="form-control" id="name" name="recipient_name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="phone" class="form-label">Телефон</label>
-                            <input type="tel" class="form-control" id="phone" name="phone" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="address" class="form-label">Адрес доставки</label>
-                            <textarea class="form-control" id="address" name="delivery_address" rows="3" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="comments" class="form-label">Комментарий к заказу</label>
-                            <textarea class="form-control" id="comments" name="comments" rows="2"></textarea>
-                        </div>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm p-4 border-0 rounded-3">
+                <h3 class="mb-4 fw-bold text-primary">Данные для доставки</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-semibold">Имя получателя</label>
+                        <input type="text" class="form-control" id="name" name="recipient_name" required placeholder="Ваше имя">
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label fw-semibold">Телефон</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" required placeholder="+375 (29) 123-45-67">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-semibold">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required placeholder="example@gmail.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label fw-semibold">Адрес доставки</label>
+                        <textarea class="form-control" id="address" name="delivery_address" rows="3" required placeholder="Введите адрес"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="comments" class="form-label fw-semibold">Комментарий к заказу</label>
+                        <textarea class="form-control" id="comments" name="comments" rows="2" placeholder="Дополнительная информация"></textarea>
+                    </div>
 
-                        <div class="delivery-info">
-                            <i class="bi bi-truck delivery-icon"></i>
-                            Бесплатная доставка по городу
+                    <div class="alert alert-info d-flex align-items-center p-3 rounded-3">
+                        <i class="bi bi-truck display-6 me-3 text-primary"></i>
+                        <div>
+                            <strong>Бесплатная доставка</strong> по городу при заказе от 50 BYN.
                         </div>
+                    </div>
 
-                        <button type="submit" class="btn-submit">
-                            Подтвердить заказ
-                        </button>
-                    </form>
-                </div>
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold mt-3">
+                        <i class="bi bi-bag-check"></i> Подтвердить заказ
+                    </button>
+                </form>
             </div>
+        </div>
 
-            <div class="col-lg-4">
-                <div class="checkout-card">
-                    <h3 class="section-title">Ваш заказ</h3>
-                    <div class="order-summary">
-                        <ul class="item-list">
-                            {% for item in cart_items %}
-                            <li>
-                                <span>{{ item.product.name }} × {{ item.quantity }}</span>
-                                <span>{{ item.total_price }} BYN</span>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="section-title mb-0">Итого:</span>
-                        <span class="total-price">{{ total }} BYN</span>
-                    </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm p-4 border-0 rounded-3">
+                <h3 class="mb-4 fw-bold text-dark">Ваш заказ</h3>
+                <ul class="list-group list-group-flush">
+                    {% for item in cart_items %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold">{{ item.product.name }} × {{ item.quantity }}</span>
+                        <span class="text-success fw-bold">{{ item.total_price }} BYN</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold fs-5 text-dark">Итого:</span>
+                    <span class="text-success fs-4 fw-bold">{{ total }} BYN</span>
                 </div>
             </div>
         </div>
-    </main>
-
+    </div>
+</main>
 
 {% endblock %}

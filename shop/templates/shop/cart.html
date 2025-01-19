@@ -1,83 +1,83 @@
 {% extends "shop/base.html" %}
 
-{% block title %}Название страницы{% endblock %}
+{% block title %}Корзина{% endblock %}
 
 {% block content %}
 
-    <main class="container my-5">
-        <h1 class="page-title">Корзина</h1>
+<main class="container my-5">
+    <h1 class="text-center mb-4 fw-bold text-dark">Корзина</h1>
 
-        {% if cart_items %}
-        <div class="row">
-            <div class="col-lg-8">
-                {% for item in cart_items %}
-                    <div class="cart-item" data-product-id="{{ item.product.id }}">
-                        <div class="row align-items-center">
-                            <div class="col-md-2">
-                                {% if item.product.image %}
-                                    <img src="{{ item.product.image.url }}" class="card-img-top" alt="{{ item.product.name }}">
-                                {% else %}
-                                    <img src="https://via.placeholder.com/100" class="card-img-top" alt="Нет изображения">
-                                {% endif %}
-                            </div>
-                            <div class="col-md-4">
-                                <h5 class="item-title">{{ item.product.name }}</h5>
-                                <p class="text-muted mb-0">Артикул: #{{ item.product.id }}</p>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="quantity-control">
-                                    <button class="quantity-btn decrease">-</button>
-                                    <span>{{ item.quantity }}</span>
-                                    <button class="quantity-btn increase">+</button>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <span class="item-price">{{ item.total_price }} BYN</span>
-                            </div>
-                            <div class="col-md-2 text-end">
-                                <a href="{% url 'remove_from_cart' item.product.id|default:0 %}" class="btn-remove">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </div>
+    {% if cart_items %}
+    <div class="row">
+        <div class="col-lg-8">
+            {% for item in cart_items %}
+            <div class="card cart-item mb-3 p-3 shadow-sm" data-product-id="{{ item.product.id }}">
+                <div class="row align-items-center">
+                    <div class="col-md-2 text-center">
+                        {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" class="img-fluid rounded" alt="{{ item.product.name }}">
+                        {% else %}
+                        <img src="https://via.placeholder.com/100" class="img-fluid rounded" alt="Нет изображения">
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-primary">{{ item.product.name }}</h5>
+                        <p class="text-muted small mb-0">Артикул: #{{ item.product.id }}</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="input-group quantity-control">
+                            <button class="btn btn-outline-secondary decrease">-</button>
+                            <input type="text" class="form-control text-center bg-light" value="{{ item.quantity }}" readonly>
+                            <button class="btn btn-outline-secondary increase">+</button>
                         </div>
                     </div>
-                {% endfor %}
-            </div>
-
-            <div class="col-lg-4">
-                <div class="summary-card">
-                    <h4 class="mb-4">Итого</h4>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span>Товары:</span>
-                        <span>{{ total_quantity }} шт.</span>
+                    <div class="col-md-2 text-center">
+                        <span class="item-price fw-bold fs-5 text-success">{{ item.total_price }} BYN</span>
                     </div>
-                    <hr>
-                    <div class="d-flex justify-content-between mb-4">
-                        <strong>К оплате:</strong>
-                        <strong class="item-price">{{ total }} BYN</strong>
+                    <div class="col-md-1 text-end">
+                        <a href="{% url 'remove_from_cart' item.product.id %}" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash3"></i>
+                        </a>
                     </div>
-                    <a href="{% url 'checkout' %}" class="btn-checkout w-100 text-center">
-                        Оформить заказ
-                    </a>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% else %}
-        <div class="text-center my-5">
-            <i class="bi bi-cart-x" style="font-size: 4rem; color: #ccc;"></i>
-            <h3 class="mt-3">Ваша корзина пуста</h3>
-            <p class="text-muted">Перейдите в каталог, чтобы добавить товары</p>
-            <a href="/" class="btn-checkout mt-3">Перейти в каталог</a>
+
+        <div class="col-lg-4">
+            <div class="summary-card p-4 shadow rounded-3 bg-light">
+                <h4 class="mb-4 fw-bold text-dark">Итого</h4>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Товары:</span>
+                    <span class="fw-bold">{{ total_quantity }} шт.</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-4">
+                    <strong>К оплате:</strong>
+                    <strong class="item-price text-success fs-4">{{ total }} BYN</strong>
+                </div>
+                <a href="{% url 'checkout' %}" class="btn btn-success w-100 py-2">
+                    <i class="bi bi-credit-card"></i> Оформить заказ
+                </a>
+            </div>
         </div>
-        {% endif %}
-    </main>
+    </div>
+    {% else %}
+    <div class="text-center my-5">
+        <i class="bi bi-cart-x" style="font-size: 5rem; color: #ccc;"></i>
+        <h3 class="mt-3">Ваша корзина пуста</h3>
+        <p class="text-muted">Перейдите в каталог, чтобы добавить товары</p>
+        <a href="/" class="btn btn-primary mt-3">Перейти в каталог</a>
+    </div>
+    {% endif %}
+</main>
 
 <script>
-    document.querySelectorAll('.quantity-btn').forEach(button => {
+    document.querySelectorAll('.quantity-control .btn').forEach(button => {
         button.addEventListener('click', function() {
             const isDecrease = this.classList.contains('decrease');
-            const quantitySpan = this.parentElement.querySelector('span');
-            let quantity = parseInt(quantitySpan.textContent);
+            const input = this.closest('.quantity-control').querySelector('input');
+            let quantity = parseInt(input.value);
             const productId = this.closest('.cart-item').dataset.productId;
 
             if (isDecrease && quantity > 1) {
@@ -86,9 +86,8 @@
                 quantity++;
             }
 
-            quantitySpan.textContent = quantity;
+            input.value = quantity;
 
-            // Отправка обновленных данных на сервер
             fetch(`/shop/update-cart/${productId}/`, {
                 method: 'POST',
                 headers: {
@@ -100,8 +99,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Обновляем итоговые данные в саммари-карте
-                    document.querySelector('.summary-card span:nth-child(2)').textContent = `${data.total_quantity} шт.`;
+                    document.querySelector('.summary-card span.fw-bold').textContent = `${data.total_quantity} шт.`;
                     document.querySelector('.summary-card strong.item-price').textContent = `${data.total_price} BYN`;
                 } else {
                     alert('Ошибка при обновлении корзины');
@@ -111,7 +109,6 @@
         });
     });
 
-    // Функция для получения CSRF-токена из куков
     function getCSRFToken() {
         let cookieValue = null;
         const cookies = document.cookie.split(';');
@@ -124,6 +121,6 @@
         }
         return cookieValue;
     }
-
 </script>
+
 {% endblock %}
